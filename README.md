@@ -1,4 +1,3 @@
-
 # 03 — Compose + Swagger UI
 
 Objectif: Ajouter Swagger UI comme sidecar pour documenter l'API.
