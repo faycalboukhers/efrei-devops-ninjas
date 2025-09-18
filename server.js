@@ -8,7 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialisation de la DB
-const dbPath = path.join(__dirname, 'data.db');
+const dbPath = process.env.NODE_ENV === 'test' 
+  ? ':memory:' 
+  : path.join(__dirname, 'data.db');
+  
 const db = new sqlite3.Database(dbPath);
 
 // Création et seed de la table config si nécessaire
@@ -38,12 +41,14 @@ db.serialize(() => {
     ['metro.last', lastMetroTimes]);
 });
 
-// Logger minimal: méthode, chemin, status, durée
+// Logger minimal: méthode, chemin, status, durée (désactivé en test)
 app.use((req, res, next) => {
   const t0 = Date.now();
   res.on('finish', () => {
     const dt = Date.now() - t0;
-    console.log(`${req.method} ${req.path} -> ${res.statusCode} ${dt}ms`);
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`${req.method} ${req.path} -> ${res.statusCode} ${dt}ms`);
+    }
   });
   next();
 });
@@ -124,8 +129,11 @@ app.use((_req, res) => {
   res.status(404).json({ error: 'not found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`API ready on http://localhost:${PORT}`);
-});
+// Ne démarrer le serveur que si ce n'est pas un test
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`API ready on http://localhost:${PORT}`);
+  });
+}
 
 module.exports = app; // Pour les tests

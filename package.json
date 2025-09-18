@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "jest",
+    "test:unit": "jest tests/utils.test.js",
+    "test:integration": "jest tests/integration.test.js",
     "test:watch": "jest --watch"
   },
   "dependencies": {
