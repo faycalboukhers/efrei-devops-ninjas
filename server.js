@@ -2,6 +2,7 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const { nextTimeFromNow } = require('./utils');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -52,15 +53,6 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', service: 'dernier-metro-api' });
 });
 
-// Utilitaire pour simuler un horaire HH:MM
-function nextTimeFromNow(headwayMin = 3) {
-  const now = new Date();
-  const next = new Date(now.getTime() + headwayMin * 60 * 1000);
-  const hh = String(next.getHours()).padStart(2, '0');
-  const mm = String(next.getMinutes()).padStart(2, '0');
-  return `${hh}:${mm}`;
-}
-
 // Endpoint métier minimal (ne lit pas la DB)
 app.get('/next-metro', (req, res) => {
   const station = (req.query.station || '').toString().trim();
@@ -68,12 +60,17 @@ app.get('/next-metro', (req, res) => {
     return res.status(400).json({ error: "missing station" });
   }
   
-  return res.status(200).json({ 
-    station, 
-    line: 'M1', 
-    headwayMin: 3, 
-    nextArrival: nextTimeFromNow(3) 
-  });
+  try {
+    return res.status(200).json({ 
+      station, 
+      line: 'M1', 
+      headwayMin: 3, 
+      nextArrival: nextTimeFromNow(3) 
+    });
+  } catch (error) {
+    console.error('Error calculating next time:', error);
+    return res.status(500).json({ error: "internal server error" });
+  }
 });
 
 // Endpoint qui lit la DB pour les derniers métros

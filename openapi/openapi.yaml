@@ -1,17 +1,20 @@
-
 openapi: 3.0.3
 info:
   title: Dernier Métro API
+  description: API pour connaître les prochains passages et derniers métros à Paris
   version: 1.0.0
 servers:
   - url: http://localhost:5000
+    description: Serveur local de développement
+
 paths:
   /health:
     get:
       summary: Health check
+      description: Vérification de l'état de l'API
       responses:
         '200':
-          description: OK
+          description: L'API fonctionne correctement
           content:
             application/json:
               schema:
@@ -19,41 +22,137 @@ paths:
                 properties:
                   status:
                     type: string
+                    example: "ok"
                   service:
                     type: string
+                    example: "dernier-metro-api"
+
   /next-metro:
     get:
       summary: Prochain passage de métro
+      description: Calcule l'heure du prochain passage de métro (simulation, ne lit pas la DB)
       parameters:
         - in: query
           name: station
           schema:
             type: string
           required: true
-          description: Nom de la station
+          description: Nom de la station de métro
+          example: "Chatelet"
       responses:
         '200':
-          description: Heure d'arrivée estimée
+          description: Heure d'arrivée estimée du prochain métro
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - station
+                  - line
+                  - headwayMin
+                  - nextArrival
                 properties:
                   station:
                     type: string
+                    description: Nom de la station
+                    example: "Chatelet"
                   line:
                     type: string
+                    description: Ligne de métro
+                    example: "M1"
                   headwayMin:
                     type: integer
+                    description: Fréquence en minutes entre les rames
+                    example: 3
                   nextArrival:
                     type: string
+                    pattern: '^[0-2][0-9]:[0-5][0-9]$'
+                    description: Heure d'arrivée au format HH:MM
                     example: "12:34"
         '400':
-          description: Paramètre manquant
+          description: Paramètre station manquant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "missing station"
+
+  /last-metro:
+    get:
+      summary: Dernier métro de la journée
+      description: Récupère l'heure du dernier métro pour une station donnée (lit la base de données)
+      parameters:
+        - in: query
+          name: station
+          schema:
+            type: string
+          required: true
+          description: Nom de la station de métro (insensible à la casse)
+          example: "chatelet"
+      responses:
+        '200':
+          description: Informations sur le dernier métro
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - station
+                  - lastMetro
+                  - line
+                  - tz
                 properties:
-                  error:
+                  station:
                     type: string
+                    description: Nom de la station (casse originale préservée)
+                    example: "Chatelet"
+                  lastMetro:
+                    type: string
+                    pattern: '^[0-2][0-9]:[0-5][0-9]$'
+                    description: Heure du dernier métro au format HH:MM
+                    example: "01:15"
+                  line:
+                    type: string
+                    description: Ligne de métro
+                    example: "M1"
+                  tz:
+                    type: string
+                    description: Fuseau horaire
+                    example: "Europe/Paris"
+        '400':
+          description: Paramètre station manquant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "missing station"
+        '404':
+          description: Station inconnue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "station not found"
+        '500':
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "internal server error"
+
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Message d'erreur descriptif
+          example: "missing station"
