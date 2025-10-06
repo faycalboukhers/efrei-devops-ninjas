@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres-green:
+    image: postgres:15-alpine
+    container_name: metro-postgres-green
+    environment:
+      POSTGRES_DB: metro_db
+      POSTGRES_USER: metro_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD:-prod_password_change_me}
+    volumes:
+      - postgres_green_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - green-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metro_user -d metro_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api-green:
+    image: ${GREEN_IMAGE:-dernier-metro-api:green}
+    container_name: metro-api-green
+    environment:
+      PORT: 5002
+      DATABASE_URL: postgres://metro_user:${POSTGRES_PASSWORD_PROD:-prod_password_change_me}@postgres-green:5432/metro_db
+      NODE_ENV: production
+    ports:
+      - "5002:5002"
+    networks:
+      - green-network
+    depends_on:
+      postgres-green:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_green_data:
+    name: metro_postgres_green_data
+
+networks:
+  green-network:
+    name: metro_green_network
+    driver: bridge

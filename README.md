@@ -22,6 +22,7 @@ API pour connaître les horaires du dernier métro à Paris.
 - `add-postgresql` : Migration de SQLite vers PostgreSQL
 - `10-security-scans` : Scans de sécurité automatisés (npm audit, Trivy, Gitleaks)
 - `11-deploy-staging` : Déploiement automatique vers environnement staging
+- `12-prod-deployment` : Déploiement production Blue-Green (zero-downtime)
 
 ## Installation locale
 
