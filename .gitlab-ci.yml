@@ -133,10 +133,10 @@ deploy:staging:
     name: staging
     url: https://staging.dernier-metro-api.example.com
   before_script:
-    - apk add --no-cache docker-compose curl
+    - apk add --no-cache curl
   script:
     - echo "Deploying to staging environment..."
-    - echo "Image: $STAGING_IMAGE"
+    - echo "Image STAGING_IMAGE"
     - echo "Deployment to staging completed"
   needs: ["docker:build:staging"]
   only:
@@ -205,7 +205,8 @@ docker:build:green:
     - 12-prod-deployment
   when: manual
 
-# Déploiement Blue (production active)
+
+# Déploiement Blue
 deploy:blue:
   stage: production
   image: alpine:latest
@@ -213,59 +214,19 @@ deploy:blue:
     name: production-blue
     url: https://api.dernier-metro-api.example.com
   before_script:
-    - apk add --no-cache docker-compose curl
+    - apk add --no-cache curl
   script:
     - echo "===== BLUE DEPLOYMENT ====="
     - echo "Deploying BLUE environment to production..."
-    - echo "Image: $BLUE_IMAGE"
-    - |
-      cat > docker-compose.blue.yml <<EOF
-      version: '3.8'
-      services:
-        postgres-blue:
-          image: postgres:15-alpine
-          environment:
-            POSTGRES_DB: metro_db
-            POSTGRES_USER: metro_user
-            POSTGRES_PASSWORD: \${POSTGRES_PASSWORD_PROD}
-          volumes:
-            - postgres_blue_data:/var/lib/postgresql/data
-            - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-          networks:
-            - blue-network
-          healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U metro_user"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
-        api-blue:
-          image: $BLUE_IMAGE
-          environment:
-            PORT: 5001
-            DATABASE_URL: postgres://metro_user:\${POSTGRES_PASSWORD_PROD}@postgres-blue:5432/metro_db
-            NODE_ENV: production
-          ports:
-            - "5001:5001"
-          networks:
-            - blue-network
-          depends_on:
-            postgres-blue:
-              condition: service_healthy
-      volumes:
-        postgres_blue_data:
-      networks:
-        blue-network:
-      EOF
-    - cat docker-compose.blue.yml
+    - echo "Image BLUE_IMAGE"
     - echo "BLUE environment is now ACTIVE on port 5001"
-    - echo "Production URL: https://api.dernier-metro-api.example.com"
   needs: ["docker:build:blue"]
   only:
     - main
     - 12-prod-deployment
   when: manual
 
-# Déploiement Green (production standby)
+# Déploiement Green
 deploy:green:
   stage: production
   image: alpine:latest
@@ -273,58 +234,19 @@ deploy:green:
     name: production-green
     url: https://green.dernier-metro-api.example.com
   before_script:
-    - apk add --no-cache docker-compose curl
+    - apk add --no-cache curl
   script:
     - echo "===== GREEN DEPLOYMENT ====="
     - echo "Deploying GREEN environment to production..."
-    - echo "Image: $GREEN_IMAGE"
-    - |
-      cat > docker-compose.green.yml <<EOF
-      version: '3.8'
-      services:
-        postgres-green:
-          image: postgres:15-alpine
-          environment:
-            POSTGRES_DB: metro_db
-            POSTGRES_USER: metro_user
-            POSTGRES_PASSWORD: \${POSTGRES_PASSWORD_PROD}
-          volumes:
-            - postgres_green_data:/var/lib/postgresql/data
-            - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-          networks:
-            - green-network
-          healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U metro_user"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
-        api-green:
-          image: $GREEN_IMAGE
-          environment:
-            PORT: 5002
-            DATABASE_URL: postgres://metro_user:\${POSTGRES_PASSWORD_PROD}@postgres-green:5432/metro_db
-            NODE_ENV: production
-          ports:
-            - "5002:5002"
-          networks:
-            - green-network
-          depends_on:
-            postgres-green:
-              condition: service_healthy
-      volumes:
-        postgres_green_data:
-      networks:
-        green-network:
-      EOF
-    - cat docker-compose.green.yml
+    - echo "Image GREEN_IMAGE"
     - echo "GREEN environment deployed on port 5002 (standby)"
-    - echo "Use load balancer to switch traffic from Blue to Green"
   needs: ["docker:build:green"]
   only:
     - main
     - 12-prod-deployment
   when: manual
 
+  
 # Switch production traffic (Blue to Green or Green to Blue)
 deploy:switch:
   stage: production
