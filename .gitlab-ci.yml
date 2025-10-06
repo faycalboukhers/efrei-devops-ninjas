@@ -1,0 +1,55 @@
+image: node:20-alpine
+
+stages:
+  - test
+  - build
+
+# Cache pour accélérer les builds
+cache:
+  paths:
+    - node_modules/
+
+# Job de tests unitaires
+test:unit:
+  stage: test
+  before_script:
+    - npm install
+  script:
+    - npm run test:unit
+  artifacts:
+    reports:
+      junit: junit.xml
+    paths:
+      - coverage/
+    expire_in: 1 week
+
+# Job de tests d'intégration
+test:integration:
+  stage: test
+  before_script:
+    - npm install
+  script:
+    - NODE_ENV=test npm run test:integration
+  artifacts:
+    reports:
+      junit: junit-integration.xml
+    expire_in: 1 week
+
+# Job de validation de la syntaxe
+lint:
+  stage: test
+  before_script:
+    - npm install
+  script:
+    - echo "Linting code..."
+    - node -c server.js
+    - node -c utils.js
+  allow_failure: true
+
+# Job de build de vérification
+build:check:
+  stage: build
+  needs: ["test:unit", "test:integration"]
+  script:
+    - echo "Build verification successful"
+    - echo "API version $(node -p "require('./package.json').version")"
