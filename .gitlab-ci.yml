@@ -1,4 +1,4 @@
-image: node:20-alpine
+image: node:20
 
 stages:
   - test
@@ -13,28 +13,18 @@ cache:
 test:unit:
   stage: test
   before_script:
-    - npm install
+    - npm ci --prefer-offline
   script:
-    - npx jest tests/utils.test.js
-  artifacts:
-    reports:
-      junit: junit.xml
-    paths:
-      - coverage/
-    expire_in: 1 week
+    - npm run test:unit
   allow_failure: false
 
 # Job de tests d'intégration
 test:integration:
   stage: test
   before_script:
-    - npm install
+    - npm ci --prefer-offline
   script:
-    - NODE_ENV=test npx jest tests/integration.test.js
-  artifacts:
-    reports:
-      junit: junit-integration.xml
-    expire_in: 1 week
+    - NODE_ENV=test npm run test:integration
   allow_failure: false
 
 # Job de validation de la syntaxe
@@ -53,5 +43,6 @@ build:check:
   stage: build
   needs: ["test:unit", "test:integration"]
   script:
+    - npm install
     - echo "Build verification successful"
     - echo "API version $(node -p "require('./package.json').version")"
