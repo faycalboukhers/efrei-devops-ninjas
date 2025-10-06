@@ -21,6 +21,7 @@ API pour connaître les horaires du dernier métro à Paris.
 - `09-docker-build-ci` : Build automatisé d'images Docker dans le pipeline
 - `add-postgresql` : Migration de SQLite vers PostgreSQL
 - `10-security-scans` : Scans de sécurité automatisés (npm audit, Trivy, Gitleaks)
+- `11-deploy-staging` : Déploiement automatique vers environnement staging
 
 ## Installation locale
 
