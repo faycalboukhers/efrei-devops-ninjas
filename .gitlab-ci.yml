@@ -10,7 +10,7 @@ cache:
   paths:
     - node_modules/
 
-# Job de tests unitaires
+# Job de tests unitaires (sans DB)
 test:unit:
   stage: test
   before_script:
@@ -19,11 +19,21 @@ test:unit:
     - npm run test:unit
   allow_failure: false
 
-# Job de tests d'intégration
+# Job de tests d'intégration (avec PostgreSQL)
 test:integration:
   stage: test
+  services:
+    - postgres:15-alpine
+  variables:
+    POSTGRES_DB: metro_db
+    POSTGRES_USER: metro_user
+    POSTGRES_PASSWORD: metro_password
+    DATABASE_URL: postgres://metro_user:metro_password@postgres:5432/metro_db
   before_script:
     - npm install
+    - apt-get update && apt-get install -y postgresql-client
+    - until pg_isready -h postgres -p 5432 -U metro_user; do echo "Waiting for postgres..."; sleep 2; done
+    - PGPASSWORD=metro_password psql -h postgres -U metro_user -d metro_db -f init-db.sql
   script:
     - NODE_ENV=test npm run test:integration
   allow_failure: false
