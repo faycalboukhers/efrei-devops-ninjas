@@ -18,6 +18,7 @@ API pour connaître les horaires du dernier métro à Paris.
 - `06-unit-tests` : Tests unitaires (9 tests)
 - `07-integration-tests` : Tests d'intégration (13 tests)
 - `08-gitlab-ci-basic` : Pipeline CI basique avec tests automatisés
+- `09-docker-build-ci` : Build automatisé d'images Docker dans le pipeline
 
 ## Installation locale
 
@@ -69,8 +70,10 @@ Le pipeline GitLab CI exécute automatiquement :
 - Tests d'intégration
 - Validation de la syntaxe (linting)
 - Vérification du build
+- Construction automatique des images Docker
 
 Les tests doivent passer avant tout merge.
+Les images Docker sont buildées automatiquement à chaque commit.
 
 ----------------------------------------------------------
 ----------------------------------------------------------

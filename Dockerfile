@@ -1,18 +1,14 @@
 FROM node:20-alpine
 
-# Installer les dépendances système nécessaires pour sqlite3
-RUN apk add --no-cache python3 make g++
-
 WORKDIR /app
 
 COPY package.json .
 
-RUN npm install
+RUN npm install --production
 
 COPY server.js .
-
-# Créer le répertoire pour la DB
-RUN mkdir -p /app/data
+COPY utils.js .
+COPY db.js .
 
 ENV PORT=5000
 
