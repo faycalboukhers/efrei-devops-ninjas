@@ -9,9 +9,10 @@ describe('Integration Tests - API Endpoints', () => {
         .get('/health')
         .expect(200);
 
-      expect(response.body).toEqual({
+      expect(response.body).toMatchObject({
         status: 'ok',
-        service: 'dernier-metro-api'
+        service: 'dernier-metro-api',
+        database: 'connected'
       });
     });
   });
@@ -28,7 +29,6 @@ describe('Integration Tests - API Endpoints', () => {
         headwayMin: 3
       });
 
-      // Vérifier que nextArrival est au format HH:MM
       expect(response.body.nextArrival).toMatch(/^[0-2][0-9]:[0-5][0-9]$/);
     });
 
@@ -73,7 +73,7 @@ describe('Integration Tests - API Endpoints', () => {
         .expect(200);
 
       expect(response.body).toMatchObject({
-        station: 'CONCORDE', // Conserve la casse originale
+        station: 'CONCORDE',
         lastMetro: '01:10',
         line: 'M1',
         tz: 'Europe/Paris'
@@ -137,7 +137,6 @@ describe('Integration Tests - API Endpoints', () => {
           tz: 'Europe/Paris'
         });
         
-        // Vérifier que lastMetro est au format HH:MM
         expect(response.body.lastMetro).toMatch(/^[0-2][0-9]:[0-5][0-9]$/);
       }
     });
@@ -157,16 +156,18 @@ describe('Integration Tests - API Endpoints', () => {
 
   describe('Database Integration', () => {
     test('should have seeded data in database', async () => {
-      // Test indirect via l'API pour vérifier que les données sont bien en DB
       const response = await request(app)
         .get('/last-metro?station=chatelet')
         .expect(200);
 
-      // Si on arrive ici, cela confirme que :
-      // 1. La DB existe et fonctionne
-      // 2. Les données ont été seedées
-      // 3. La lecture depuis la DB fonctionne
       expect(response.body.lastMetro).toBe('01:15');
     });
+  });
+
+  afterAll(() => {
+    // Fermer les connexions pour éviter que Jest ne reste ouvert
+    if (global.pool) {
+      global.pool.end();
+    }
   });
 });

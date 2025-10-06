@@ -23,4 +23,12 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
+// Fermer le pool proprement lors de l'arrêt
+process.on('SIGINT', () => {
+  pool.end(() => {
+    console.log('Database pool closed');
+    process.exit(0);
+  });
+});
+
 module.exports = pool;
