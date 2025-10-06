@@ -15,13 +15,14 @@ test:unit:
   before_script:
     - npm install
   script:
-    - npm run test:unit
+    - npx jest tests/utils.test.js
   artifacts:
     reports:
       junit: junit.xml
     paths:
       - coverage/
     expire_in: 1 week
+  allow_failure: false
 
 # Job de tests d'intégration
 test:integration:
@@ -29,11 +30,12 @@ test:integration:
   before_script:
     - npm install
   script:
-    - NODE_ENV=test npm run test:integration
+    - NODE_ENV=test npx jest tests/integration.test.js
   artifacts:
     reports:
       junit: junit-integration.xml
     expire_in: 1 week
+  allow_failure: false
 
 # Job de validation de la syntaxe
 lint:
