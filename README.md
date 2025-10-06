@@ -19,6 +19,8 @@ API pour connaître les horaires du dernier métro à Paris.
 - `07-integration-tests` : Tests d'intégration (13 tests)
 - `08-gitlab-ci-basic` : Pipeline CI basique avec tests automatisés
 - `09-docker-build-ci` : Build automatisé d'images Docker dans le pipeline
+- `add-postgresql` : Migration de SQLite vers PostgreSQL
+- `10-security-scans` : Scans de sécurité automatisés (npm audit, Trivy, Gitleaks)
 
 ## Installation locale
 
