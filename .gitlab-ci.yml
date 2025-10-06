@@ -81,7 +81,10 @@ security:snyk:
 # Scan des secrets (détection de clés API, passwords, etc.)
 security:secrets:
   stage: security
-  image: zricethezav/gitleaks:latest
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git curl
+    - curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz | tar -xz -C /usr/local/bin
   script:
     - gitleaks detect --source . --verbose --no-git
   allow_failure: true
