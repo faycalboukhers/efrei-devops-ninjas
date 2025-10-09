@@ -1,0 +1,20 @@
+node_modules/
+npm-debug.log
+.env
+.env.local
+.env.*.local
+data.db
+*.log
+coverage/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Security scan reports
+npm-audit-report.json
+trivy-report.json
+snyk-report.json
