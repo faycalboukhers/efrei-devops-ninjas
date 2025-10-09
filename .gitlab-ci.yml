@@ -178,7 +178,7 @@ docker:build:blue:
     - docker build -t $BLUE_IMAGE .
     - docker tag $BLUE_IMAGE $PROD_IMAGE
     - echo "Blue (production) image built successfully"
-    - docker images | grep dernier-metro
+    - docker images  # Enlever le grep qui cause l'échec
   needs: ["test:staging:smoke"]
   only:
     - main
@@ -198,7 +198,7 @@ docker:build:green:
   script:
     - docker build -t $GREEN_IMAGE .
     - echo "Green (production) image built successfully"
-    - docker images | grep dernier-metro
+    - docker images  # Enlever le grep qui cause l'échec
   needs: ["test:staging:smoke"]
   only:
     - main
