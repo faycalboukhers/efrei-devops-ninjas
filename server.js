@@ -2,9 +2,15 @@
 const express = require("express");
 const pool = require('./db');
 const { nextTimeFromNow } = require('./utils');
+const { initDB } = require('./init-db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialiser la DB au démarrage (uniquement en production)
+if (process.env.NODE_ENV === 'production') {
+  initDB().catch(console.error);
+}
 
 // Logger minimal
 app.use((req, res, next) => {
